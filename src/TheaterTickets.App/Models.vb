@@ -7,3 +7,9 @@
         Me.Number = number
     End Sub
 End Class
+
+Public Class UserSession
+    Public Property Id As Guid
+    Public Property Username As String
+    Public Property FullName As String
+End Class

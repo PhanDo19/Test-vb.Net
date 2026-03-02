@@ -222,4 +222,127 @@ ORDER BY p.starts_at;"
             End Using
         End Using
     End Sub
+
+    Public Function LoadUsers() As DataTable
+        Dim dt As New DataTable()
+        Using conn = GetConnection(), cmd = conn.CreateCommand()
+            cmd.CommandText = "
+SELECT u.id,
+       u.username,
+       u.full_name,
+       u.is_active,
+       COALESCE(string_agg(r.code, ',' ORDER BY r.code), '') AS roles
+FROM users u
+LEFT JOIN user_roles ur ON ur.user_id = u.id
+LEFT JOIN roles r ON r.id = ur.role_id
+GROUP BY u.id, u.username, u.full_name, u.is_active
+ORDER BY u.username;"
+            conn.Open()
+            Using da As New NpgsqlDataAdapter(cmd)
+                da.Fill(dt)
+            End Using
+        End Using
+        Return dt
+    End Function
+
+    Public Function LoadRoles() As DataTable
+        Dim dt As New DataTable()
+        Using conn = GetConnection(), cmd = conn.CreateCommand()
+            cmd.CommandText = "SELECT id, code, name FROM roles ORDER BY id"
+            conn.Open()
+            Using da As New NpgsqlDataAdapter(cmd)
+                da.Fill(dt)
+            End Using
+        End Using
+        Return dt
+    End Function
+
+    Public Function LoadUserRoleIds(userId As Guid) As List(Of Integer)
+        Dim roles As New List(Of Integer)()
+        Using conn = GetConnection(), cmd = conn.CreateCommand()
+            cmd.CommandText = "SELECT role_id FROM user_roles WHERE user_id = @u"
+            cmd.Parameters.AddWithValue("@u", userId)
+            conn.Open()
+            Using reader = cmd.ExecuteReader()
+                While reader.Read()
+                    roles.Add(reader.GetInt32(0))
+                End While
+            End Using
+        End Using
+        Return roles
+    End Function
+
+    Public Function CreateUser(username As String, fullName As String, password As String, isActive As Boolean, roleIds As List(Of Integer)) As Guid
+        Using conn = GetConnection()
+            conn.Open()
+            Using tx = conn.BeginTransaction()
+                Dim userId As Guid
+                Using cmd = conn.CreateCommand()
+                    cmd.Transaction = tx
+                    cmd.CommandText = "INSERT INTO users(username, full_name, password_hash, is_active) VALUES(@u,@f, crypt(@p, gen_salt('bf')), @a) RETURNING id"
+                    cmd.Parameters.AddWithValue("@u", username.Trim())
+                    cmd.Parameters.AddWithValue("@f", fullName.Trim())
+                    cmd.Parameters.AddWithValue("@p", password)
+                    cmd.Parameters.AddWithValue("@a", isActive)
+                    userId = CType(cmd.ExecuteScalar(), Guid)
+                End Using
+
+                For Each roleId In roleIds
+                    Using cmdRole = conn.CreateCommand()
+                        cmdRole.Transaction = tx
+                        cmdRole.CommandText = "INSERT INTO user_roles(user_id, role_id) VALUES(@u,@r)"
+                        cmdRole.Parameters.AddWithValue("@u", userId)
+                        cmdRole.Parameters.AddWithValue("@r", roleId)
+                        cmdRole.ExecuteNonQuery()
+                    End Using
+                Next
+                tx.Commit()
+                Return userId
+            End Using
+        End Using
+    End Function
+
+    Public Sub UpdateUser(userId As Guid, fullName As String, isActive As Boolean, roleIds As List(Of Integer))
+        Using conn = GetConnection()
+            conn.Open()
+            Using tx = conn.BeginTransaction()
+                Using cmd = conn.CreateCommand()
+                    cmd.Transaction = tx
+                    cmd.CommandText = "UPDATE users SET full_name=@f, is_active=@a WHERE id=@u"
+                    cmd.Parameters.AddWithValue("@f", fullName.Trim())
+                    cmd.Parameters.AddWithValue("@a", isActive)
+                    cmd.Parameters.AddWithValue("@u", userId)
+                    cmd.ExecuteNonQuery()
+                End Using
+
+                Using delCmd = conn.CreateCommand()
+                    delCmd.Transaction = tx
+                    delCmd.CommandText = "DELETE FROM user_roles WHERE user_id=@u"
+                    delCmd.Parameters.AddWithValue("@u", userId)
+                    delCmd.ExecuteNonQuery()
+                End Using
+
+                For Each roleId In roleIds
+                    Using cmdRole = conn.CreateCommand()
+                        cmdRole.Transaction = tx
+                        cmdRole.CommandText = "INSERT INTO user_roles(user_id, role_id) VALUES(@u,@r)"
+                        cmdRole.Parameters.AddWithValue("@u", userId)
+                        cmdRole.Parameters.AddWithValue("@r", roleId)
+                        cmdRole.ExecuteNonQuery()
+                    End Using
+                Next
+                tx.Commit()
+            End Using
+        End Using
+    End Sub
+
+    Public Sub UpdateUserPassword(userId As Guid, password As String)
+        Using conn = GetConnection(), cmd = conn.CreateCommand()
+            cmd.CommandText = "UPDATE users SET password_hash = crypt(@p, gen_salt('bf')) WHERE id=@u"
+            cmd.Parameters.AddWithValue("@p", password)
+            cmd.Parameters.AddWithValue("@u", userId)
+            conn.Open()
+            cmd.ExecuteNonQuery()
+        End Using
+    End Sub
 End Module

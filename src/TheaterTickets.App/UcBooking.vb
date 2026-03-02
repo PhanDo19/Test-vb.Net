@@ -13,6 +13,7 @@ Public Class UcBooking
     Private btnBook As Button
     Private dgv As DataGridView
     Private txtSearch As TextBox
+    Private ReadOnly canBook As Boolean = AuthService.HasPermission("BOOKING_CREATE")
 
     Public Sub New()
         Me.Dock = DockStyle.Fill
@@ -76,6 +77,7 @@ Public Class UcBooking
         search.Controls.Add(btnSearch)
         btnBook = New Button() With {.Text = "Đặt vé", .Width = 100, .Margin = New Padding(20, 3, 3, 3)}
         AddHandler btnBook.Click, AddressOf OnBook
+        btnBook.Enabled = canBook
         search.Controls.Add(btnBook)
 
         dgv = New DataGridView() With {
@@ -139,6 +141,10 @@ Public Class UcBooking
     End Function
 
     Private Sub OnBook(sender As Object, e As EventArgs)
+        If Not canBook Then
+            MessageBox.Show("Bạn không có quyền tạo booking.")
+            Return
+        End If
         If Not ValidateInput() Then Return
         If MessageBox.Show("Xác nhận đặt vé?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.No Then
             Return

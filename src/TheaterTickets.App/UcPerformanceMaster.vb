@@ -16,10 +16,12 @@ Public Class UcPerformanceMaster
     Private btnClear As Button
     Private btnSearch As Button
     Private _selectedId As Integer = -1
+    Private ReadOnly canManage As Boolean = AuthService.HasPermission("PERFORMANCE_MANAGE")
 
     Public Sub New()
         Me.Dock = DockStyle.Fill
         BuildUi()
+        ApplyPermissions()
         LoadGrid()
     End Sub
 
@@ -38,9 +40,9 @@ Public Class UcPerformanceMaster
         Dim groupInfo = New GroupBox() With {.Dock = DockStyle.Fill, .Text = "Thông tin suất diễn"}
         Dim infoLayout = New TableLayoutPanel() With {.Dock = DockStyle.Fill, .ColumnCount = 4, .RowCount = 2, .Padding = New Padding(6)}
         infoLayout.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 120))
-        infoLayout.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 50))
+        infoLayout.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 20))
         infoLayout.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 120))
-        infoLayout.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 50))
+        infoLayout.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 20))
         infoLayout.RowStyles.Add(New RowStyle(SizeType.Percent, 55))
         infoLayout.RowStyles.Add(New RowStyle(SizeType.Percent, 45))
 
@@ -77,8 +79,8 @@ Public Class UcPerformanceMaster
         search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 60))
         search.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 40))
         search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 30))
-        search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 140))
-        search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 30))
+        search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 120))
+        search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 35))
         search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 140))
         search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 80))
 
@@ -103,6 +105,12 @@ Public Class UcPerformanceMaster
         main.Controls.Add(groupSearch, 0, 1)
         main.Controls.Add(dgv, 0, 2)
         Me.Controls.Add(main)
+    End Sub
+
+    Private Sub ApplyPermissions()
+        btnAdd.Enabled = canManage
+        btnUpdate.Enabled = canManage
+        btnDelete.Enabled = canManage
     End Sub
 
     Private Sub LoadGrid()
@@ -135,6 +143,10 @@ Public Class UcPerformanceMaster
     End Function
 
     Private Sub OnAdd(sender As Object, e As EventArgs)
+        If Not canManage Then
+            MessageBox.Show("Bạn không có quyền thêm/sửa suất diễn.")
+            Return
+        End If
         If Not ValidateInput() Then Return
         Try
             InsertPerformance(txtTitle.Text, dtStart.Value, CInt(numDuration.Value))
@@ -146,6 +158,10 @@ Public Class UcPerformanceMaster
     End Sub
 
     Private Sub OnUpdate(sender As Object, e As EventArgs)
+        If Not canManage Then
+            MessageBox.Show("Bạn không có quyền thêm/sửa suất diễn.")
+            Return
+        End If
         If _selectedId <= 0 Then
             MessageBox.Show("Chọn bản ghi cần sửa")
             Return
@@ -160,6 +176,10 @@ Public Class UcPerformanceMaster
     End Sub
 
     Private Sub OnDelete(sender As Object, e As EventArgs)
+        If Not canManage Then
+            MessageBox.Show("Bạn không có quyền xóa suất diễn.")
+            Return
+        End If
         If _selectedId <= 0 Then
             MessageBox.Show("Chọn bản ghi cần xóa")
             Return

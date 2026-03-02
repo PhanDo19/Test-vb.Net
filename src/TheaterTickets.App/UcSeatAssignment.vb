@@ -14,6 +14,7 @@ Public Class UcSeatAssignment
     Private lblAssigned As Label
     Private seatButtons As New Dictionary(Of String, Button)()
     Private tip As New ToolTip()
+    Private ReadOnly canAssign As Boolean = AuthService.HasPermission("SEAT_ASSIGN")
 
     Private bookingsTable As DataTable
     Private currentPerformanceId As Integer
@@ -90,6 +91,7 @@ Public Class UcSeatAssignment
         footer.Controls.Add(New Label() With {.Text = "⬜ Trống  🟦 Đang chọn  🟥 Đã giữ", .AutoSize = True, .Margin = New Padding(5, 10, 20, 0)})
         btnSave = New Button() With {.Text = "Lưu", .Width = 100}
         AddHandler btnSave.Click, AddressOf OnSave
+        btnSave.Enabled = canAssign
         footer.Controls.Add(btnSave)
 
         main.Controls.Add(header, 0, 0)
@@ -99,6 +101,10 @@ Public Class UcSeatAssignment
         Me.Controls.Add(main)
 
         AddHandler cboBooking.SelectedIndexChanged, AddressOf OnBookingChanged
+        seatPanel.Enabled = canAssign
+        If Not canAssign Then
+            MessageBox.Show("Bạn chỉ có quyền xem thông tin, không được gán ghế.")
+        End If
     End Sub
 
     Private Sub LoadBookings()
@@ -164,6 +170,10 @@ Public Class UcSeatAssignment
 
     Private Sub OnSeatClick(sender As Object, e As EventArgs)
         Dim btn = CType(sender, Button)
+        If Not canAssign Then
+            MessageBox.Show("Bạn không có quyền gán ghế.")
+            Return
+        End If
         Dim seat = CType(btn.Tag, SeatPos)
         Dim exists = selectedSeats.Any(Function(s) s.RowChar = seat.RowChar AndAlso s.Number = seat.Number)
         If exists Then
@@ -183,6 +193,10 @@ Public Class UcSeatAssignment
     Private Sub OnSave(sender As Object, e As EventArgs)
         If cboBooking.SelectedValue Is Nothing Then
             MessageBox.Show("Chọn booking")
+            Return
+        End If
+        If Not canAssign Then
+            MessageBox.Show("Bạn không có quyền gán ghế.")
             Return
         End If
         If MessageBox.Show("Xác nhận lưu ghế cho booking này?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.No Then
