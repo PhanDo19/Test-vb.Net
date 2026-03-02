@@ -7,11 +7,11 @@
 
 ## Cách kết nối PostgreSQL
 1. Tạo database mới (ví dụ 	heaterdb):
-   `ash
+   `bash
    createdb -h 127.0.0.1 -p 5432 -U postgres theaterdb
    `
 2. Import schema:
-   `ash
+   `bash
    psql -h 127.0.0.1 -p 5432 -U postgres -d theaterdb -f schema.sql
    `
 3. Chuỗi kết nối (sửa Password cho đúng) trong src/TheaterTickets.App/App.config:
@@ -38,7 +38,7 @@
 - Sơ đồ ghế cố định 10×10 (A–J, 1–10).
 - Giá ghế cố định theo loại, không theo vị trí/zone.
 - Chưa có phiên đăng nhập/role; tất cả thao tác được phép.
-- Thời gian hold ghế tạm chưa hỗ trợ; kiểm tra trùng dựa trên lưu DB và unique constraint.
+- Thời gian hold ghế tạm chưa được hỗ trợ; kiểm tra trùng dựa trên lưu DB và unique constraint.
 - Kiểm thử thủ công cơ bản, chưa có test tự động.
 
 ## Tiến độ
@@ -46,4 +46,3 @@
 - [x] UI forms
 - [x] Logic đặt vé & kiểm tra trùng
 - [x] Báo cáo/bonus
-- [ ] Kiểm thử + screenshot
