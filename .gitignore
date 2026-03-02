@@ -1,0 +1,54 @@
+# Build outputs
+bin/
+obj/
+/src/TheaterTickets.App/bin/
+/src/TheaterTickets.App/obj/
+
+# Visual Studio / VS Code cache
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.VC.opendb
+
+# NuGet
+packages/
+*.nupkg
+project.lock.json
+artifacts/
+
+# Logs / temp
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.DS_Store
+Thumbs.db
+
+# Test / profiler
+*.trx
+TestResult*/
+*.coverage
+*.coveragexml
+*.psess
+*.vsp
+*.vspx
+
+# Rider / ReSharper / NCrunch
+.idea/
+_ReSharper*/
+*.DotSettings.user
+*.ncrunch*/
+*.ncrunchsolution
+
+# Local database / backups
+*.mdf
+*.ldf
+*.sqlite
+
+# Tool-specific
+.dbclient/
