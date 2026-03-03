@@ -1,4 +1,4 @@
-Imports System.Data
+﻿Imports System.Data
 Imports System.Windows.Forms
 Imports Npgsql
 
@@ -29,18 +29,29 @@ Public Class UcBooking
             .RowCount = 3,
             .Padding = New Padding(10)
         }
-        main.RowStyles.Add(New RowStyle(SizeType.Absolute, 200))
-        main.RowStyles.Add(New RowStyle(SizeType.Absolute, 60))
+        main.RowStyles.Add(New RowStyle(SizeType.Absolute, 230))
+        main.RowStyles.Add(New RowStyle(SizeType.Absolute, 70))
         main.RowStyles.Add(New RowStyle(SizeType.Percent, 100))
+
+        Dim bookingGroup = New GroupBox() With {
+            .Text = "Đặt vé",
+            .Dock = DockStyle.Fill,
+            .Padding = New Padding(10)
+        }
 
         Dim form = New TableLayoutPanel() With {
             .Dock = DockStyle.Fill,
             .ColumnCount = 2,
             .RowCount = 5,
-            .Padding = New Padding(5)
+            .Padding = New Padding(0)
         }
-        form.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 180))
+        form.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 130))
         form.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 100))
+        form.RowStyles.Add(New RowStyle(SizeType.Absolute, 32))
+        form.RowStyles.Add(New RowStyle(SizeType.Absolute, 32))
+        form.RowStyles.Add(New RowStyle(SizeType.Absolute, 32))
+        form.RowStyles.Add(New RowStyle(SizeType.Absolute, 32))
+        form.RowStyles.Add(New RowStyle(SizeType.Absolute, 32))
 
         form.Controls.Add(New Label() With {.Text = "Suất diễn", .TextAlign = ContentAlignment.MiddleLeft, .Dock = DockStyle.Fill}, 0, 0)
         cboPerformance = New ComboBox() With {.Dock = DockStyle.Fill, .DropDownStyle = ComboBoxStyle.DropDownList, .DisplayMember = "title", .ValueMember = "id"}
@@ -51,7 +62,7 @@ Public Class UcBooking
         form.Controls.Add(txtCustomer, 1, 1)
 
         form.Controls.Add(New Label() With {.Text = "Loại ghế", .TextAlign = ContentAlignment.MiddleLeft, .Dock = DockStyle.Fill}, 0, 2)
-        cboCategory = New ComboBox() With {.Dock = DockStyle.Left, .DropDownStyle = ComboBoxStyle.DropDownList, .Width = 200}
+        cboCategory = New ComboBox() With {.Dock = DockStyle.Fill, .DropDownStyle = ComboBoxStyle.DropDownList}
         cboCategory.Items.AddRange(New Object() {"standard", "vip", "double"})
         cboCategory.SelectedIndex = 0
         form.Controls.Add(cboCategory, 1, 2)
@@ -61,24 +72,41 @@ Public Class UcBooking
         form.Controls.Add(numTickets, 1, 3)
 
         form.Controls.Add(New Label() With {.Text = "Tổng tiền", .TextAlign = ContentAlignment.MiddleLeft, .Dock = DockStyle.Fill}, 0, 4)
-        lblTotal = New Label() With {.Dock = DockStyle.Left, .AutoSize = True, .Font = New Font("Segoe UI", 11, FontStyle.Bold)}
+        lblTotal = New Label() With {.Dock = DockStyle.Fill, .AutoSize = False, .TextAlign = ContentAlignment.MiddleLeft, .Font = New Font("Segoe UI", 11, FontStyle.Bold)}
         form.Controls.Add(lblTotal, 1, 4)
 
         AddHandler cboCategory.SelectedIndexChanged, AddressOf Recalc
         AddHandler numTickets.ValueChanged, AddressOf Recalc
         Recalc(Nothing, EventArgs.Empty)
 
-        Dim search = New FlowLayoutPanel() With {.Dock = DockStyle.Fill, .FlowDirection = FlowDirection.LeftToRight}
-        search.Controls.Add(New Label() With {.Text = "Tìm suất diễn", .AutoSize = True, .Margin = New Padding(0, 8, 5, 0)})
-        txtSearch = New TextBox() With {.Width = 220}
-        search.Controls.Add(txtSearch)
-        Dim btnSearch = New Button() With {.Text = "Tìm", .Width = 80}
+        bookingGroup.Controls.Add(form)
+
+        Dim searchGroup = New GroupBox() With {
+            .Text = "Tìm kiếm",
+            .Dock = DockStyle.Fill,
+            .Padding = New Padding(10)
+        }
+
+        Dim search = New TableLayoutPanel() With {
+            .Dock = DockStyle.Fill,
+            .ColumnCount = 4,
+            .RowCount = 1
+        }
+        search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 130))
+        search.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 100))
+        search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 90))
+        search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 120))
+
+        search.Controls.Add(New Label() With {.Text = "Tìm suất diễn", .TextAlign = ContentAlignment.MiddleLeft, .Dock = DockStyle.Fill}, 0, 0)
+        txtSearch = New TextBox() With {.Dock = DockStyle.Fill}
+        search.Controls.Add(txtSearch, 1, 0)
+        Dim btnSearch = New Button() With {.Text = "Tìm", .Dock = DockStyle.Fill}
         AddHandler btnSearch.Click, Sub(s, e) LoadGrid()
-        search.Controls.Add(btnSearch)
-        btnBook = New Button() With {.Text = "Đặt vé", .Width = 100, .Margin = New Padding(20, 3, 3, 3)}
+        search.Controls.Add(btnSearch, 2, 0)
+        btnBook = New Button() With {.Text = "Đặt vé", .Dock = DockStyle.Fill}
         AddHandler btnBook.Click, AddressOf OnBook
         btnBook.Enabled = canBook
-        search.Controls.Add(btnBook)
+        search.Controls.Add(btnBook, 3, 0)
 
         dgv = New DataGridView() With {
             .Dock = DockStyle.Fill,
@@ -88,8 +116,10 @@ Public Class UcBooking
             .AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         }
 
-        main.Controls.Add(form, 0, 0)
-        main.Controls.Add(search, 0, 1)
+        searchGroup.Controls.Add(search)
+
+        main.Controls.Add(bookingGroup, 0, 0)
+        main.Controls.Add(searchGroup, 0, 1)
         main.Controls.Add(dgv, 0, 2)
         Me.Controls.Add(main)
     End Sub
@@ -160,3 +190,6 @@ Public Class UcBooking
         End Try
     End Sub
 End Class
+
+
+

@@ -22,6 +22,7 @@ Public Class UcPerformanceMaster
         Me.Dock = DockStyle.Fill
         BuildUi()
         ApplyPermissions()
+        SetDefaultDateRange()
         LoadGrid()
     End Sub
 
@@ -37,12 +38,12 @@ Public Class UcPerformanceMaster
         main.RowStyles.Add(New RowStyle(SizeType.Percent, 100))  ' grid
 
         ' Group thông tin + CRUD
-        Dim groupInfo = New GroupBox() With {.Dock = DockStyle.Fill, .Text = "Thông tin suất diễn"}
+        Dim groupInfo = New GroupBox() With {.Dock = DockStyle.Fill, .Text = "Thông tin suất diễn", .Padding = New Padding(8)}
         Dim infoLayout = New TableLayoutPanel() With {.Dock = DockStyle.Fill, .ColumnCount = 4, .RowCount = 2, .Padding = New Padding(6)}
-        infoLayout.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 120))
-        infoLayout.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 20))
-        infoLayout.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 120))
-        infoLayout.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 20))
+        infoLayout.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 130))
+        infoLayout.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 50))
+        infoLayout.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 130))
+        infoLayout.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 50))
         infoLayout.RowStyles.Add(New RowStyle(SizeType.Percent, 55))
         infoLayout.RowStyles.Add(New RowStyle(SizeType.Percent, 45))
 
@@ -74,15 +75,15 @@ Public Class UcPerformanceMaster
         groupInfo.Controls.Add(actions)
 
         ' Group tìm kiếm
-        Dim groupSearch = New GroupBox() With {.Dock = DockStyle.Fill, .Text = "Tìm kiếm"}
+        Dim groupSearch = New GroupBox() With {.Dock = DockStyle.Fill, .Text = "Tìm kiếm", .Padding = New Padding(8)}
         Dim search = New TableLayoutPanel() With {.Dock = DockStyle.Fill, .ColumnCount = 7, .RowCount = 1, .Padding = New Padding(6)}
-        search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 60))
+        search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 70))
         search.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 40))
         search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 30))
-        search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 120))
+        search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 140))
         search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 35))
         search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 140))
-        search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 80))
+        search.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 90))
 
         search.Controls.Add(New Label() With {.Text = "Tìm tên", .Dock = DockStyle.Fill, .TextAlign = ContentAlignment.MiddleLeft}, 0, 0)
         txtSearch = New TextBox() With {.Dock = DockStyle.Fill}
@@ -111,6 +112,15 @@ Public Class UcPerformanceMaster
         btnAdd.Enabled = canManage
         btnUpdate.Enabled = canManage
         btnDelete.Enabled = canManage
+    End Sub
+
+    Private Sub SetDefaultDateRange()
+        If dtFrom Is Nothing OrElse dtTo Is Nothing Then Return
+        Dim today = DateTime.Today
+        dtTo.Value = today
+        dtTo.Checked = True
+        dtFrom.Value = today.AddDays(-30)
+        dtFrom.Checked = True
     End Sub
 
     Private Sub LoadGrid()

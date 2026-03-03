@@ -28,34 +28,36 @@ Public Class UcSeatAssignment
     End Sub
 
     Private Sub BuildUi()
-        Dim main = New TableLayoutPanel() With {.Dock = DockStyle.Fill, .ColumnCount = 1, .RowCount = 4, .Padding = New Padding(10)}
-        main.RowStyles.Add(New RowStyle(SizeType.Absolute, 90))
+        Dim main = New TableLayoutPanel() With {.Dock = DockStyle.Fill, .ColumnCount = 1, .RowCount = 4, .Padding = New Padding(12)}
+        main.RowStyles.Add(New RowStyle(SizeType.Absolute, 110))
         main.RowStyles.Add(New RowStyle(SizeType.Absolute, 50))
         main.RowStyles.Add(New RowStyle(SizeType.Percent, 100))
         main.RowStyles.Add(New RowStyle(SizeType.Absolute, 60))
 
+        Dim groupHeader = New GroupBox() With {.Dock = DockStyle.Fill, .Text = "Thông tin gán ghế", .Padding = New Padding(8)}
         Dim header = New TableLayoutPanel() With {.Dock = DockStyle.Fill, .ColumnCount = 3, .RowCount = 2}
-        header.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 110))
-        header.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 60))
-        header.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 40))
-        header.RowStyles.Add(New RowStyle(SizeType.Absolute, 40))
-        header.RowStyles.Add(New RowStyle(SizeType.Absolute, 40))
+        header.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 130))
+        header.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 100))
+        header.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 160))
+        header.RowStyles.Add(New RowStyle(SizeType.Absolute, 34))
+        header.RowStyles.Add(New RowStyle(SizeType.Absolute, 34))
 
         header.Controls.Add(New Label() With {.Text = "Booking", .Dock = DockStyle.Fill, .TextAlign = ContentAlignment.MiddleLeft}, 0, 0)
-        cboBooking = New ComboBox() With {.Dock = DockStyle.Fill, .DropDownStyle = ComboBoxStyle.DropDownList, .DisplayMember = "display", .ValueMember = "id"}
+        cboBooking = New ComboBox() With {.Dock = DockStyle.Fill, .DropDownStyle = ComboBoxStyle.DropDownList, .DisplayMember = "display", .ValueMember = "id", .Margin = New Padding(3, 4, 3, 4)}
         header.Controls.Add(cboBooking, 1, 0)
-        Dim pnlReload = New FlowLayoutPanel() With {.Dock = DockStyle.Fill, .FlowDirection = FlowDirection.LeftToRight, .WrapContents = False}
-        btnReload = New Button() With {.Text = "Tải lại", .Width = 80}
+        btnReload = New Button() With {.Text = "Tải lại", .Dock = DockStyle.Fill, .Margin = New Padding(3, 4, 3, 4), .Anchor = AnchorStyles.Left}
+        btnReload.Height = cboBooking.PreferredHeight
         AddHandler btnReload.Click, Sub(s, e) LoadBookings()
-        pnlReload.Controls.Add(btnReload)
-        header.Controls.Add(pnlReload, 2, 0)
+        header.Controls.Add(btnReload, 2, 0)
 
         header.Controls.Add(New Label() With {.Text = "Suất diễn", .Dock = DockStyle.Fill, .TextAlign = ContentAlignment.MiddleLeft}, 0, 1)
-        lblPerformance = New Label() With {.Dock = DockStyle.Fill, .AutoSize = True, .TextAlign = ContentAlignment.MiddleLeft}
+        lblPerformance = New Label() With {.Dock = DockStyle.Fill, .AutoSize = False, .TextAlign = ContentAlignment.MiddleLeft}
         header.Controls.Add(lblPerformance, 1, 1)
 
-        lblCount = New Label() With {.Dock = DockStyle.Fill, .AutoSize = True, .Font = New Font("Segoe UI", 11, FontStyle.Bold), .TextAlign = ContentAlignment.MiddleRight}
+        lblCount = New Label() With {.Dock = DockStyle.Fill, .AutoSize = False, .Font = New Font("Segoe UI", 10, FontStyle.Bold), .TextAlign = ContentAlignment.MiddleRight}
         header.Controls.Add(lblCount, 2, 1)
+
+        groupHeader.Controls.Add(header)
 
         seatPanel = New TableLayoutPanel() With {.Dock = DockStyle.Fill, .ColumnCount = 11, .RowCount = 11, .CellBorderStyle = TableLayoutPanelCellBorderStyle.Single}
         seatPanel.GetType().GetProperty("DoubleBuffered", Reflection.BindingFlags.NonPublic Or Reflection.BindingFlags.Instance).SetValue(seatPanel, True)
@@ -82,19 +84,23 @@ Public Class UcSeatAssignment
             Next
         Next
 
-        Dim assignedPanel = New FlowLayoutPanel() With {.Dock = DockStyle.Fill, .FlowDirection = FlowDirection.LeftToRight}
-        assignedPanel.Controls.Add(New Label() With {.Text = "Ghế đã gán:", .AutoSize = True, .Margin = New Padding(0, 8, 6, 0)})
-        lblAssigned = New Label() With {.AutoSize = True, .Font = New Font("Segoe UI", 10, FontStyle.Regular)}
-        assignedPanel.Controls.Add(lblAssigned)
+        Dim assignedPanel = New TableLayoutPanel() With {.Dock = DockStyle.Fill, .ColumnCount = 2, .RowCount = 1, .Padding = New Padding(4, 6, 4, 0)}
+        assignedPanel.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 130))
+        assignedPanel.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 100))
+        assignedPanel.Controls.Add(New Label() With {.Text = "Ghế đã gán", .Dock = DockStyle.Fill, .TextAlign = ContentAlignment.MiddleLeft}, 0, 0)
+        lblAssigned = New Label() With {.Dock = DockStyle.Fill, .AutoSize = False, .Font = New Font("Segoe UI", 10, FontStyle.Regular), .TextAlign = ContentAlignment.MiddleLeft}
+        assignedPanel.Controls.Add(lblAssigned, 1, 0)
 
-        Dim footer = New FlowLayoutPanel() With {.Dock = DockStyle.Fill, .FlowDirection = FlowDirection.LeftToRight}
-        footer.Controls.Add(New Label() With {.Text = "⬜ Trống  🟦 Đang chọn  🟥 Đã giữ", .AutoSize = True, .Margin = New Padding(5, 10, 20, 0)})
-        btnSave = New Button() With {.Text = "Lưu", .Width = 100}
+        Dim footer = New TableLayoutPanel() With {.Dock = DockStyle.Fill, .ColumnCount = 2, .RowCount = 1}
+        footer.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 100))
+        footer.ColumnStyles.Add(New ColumnStyle(SizeType.Absolute, 120))
+        footer.Controls.Add(New Label() With {.Text = "⬜ Trống  🟦 Đang chọn  🟥 Đã giữ", .Dock = DockStyle.Fill, .TextAlign = ContentAlignment.MiddleLeft, .Margin = New Padding(5, 8, 0, 0)}, 0, 0)
+        btnSave = New Button() With {.Text = "Lưu", .Dock = DockStyle.Fill, .Margin = New Padding(0, 6, 6, 6)}
         AddHandler btnSave.Click, AddressOf OnSave
         btnSave.Enabled = canAssign
-        footer.Controls.Add(btnSave)
+        footer.Controls.Add(btnSave, 1, 0)
 
-        main.Controls.Add(header, 0, 0)
+        main.Controls.Add(groupHeader, 0, 0)
         main.Controls.Add(assignedPanel, 0, 1)
         main.Controls.Add(seatPanel, 0, 2)
         main.Controls.Add(footer, 0, 3)
